@@ -1,0 +1,70 @@
+#include <Wire.h>
+#include <BH1750.h>
+
+BH1750 lightMeter;
+
+#define LED_PIN 13
+
+void setup() {
+  Serial.begin(9600); // Initialize serial communication at 9600 baud
+  
+  Wire.begin();
+  lightMeter.begin(BH1750::CONTINUOUS_HIGH_RES_MODE);
+  
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, LOW); 
+}
+
+void loop() {
+  // Read values from three potentiometers
+  int pot1Value = analogRead(A0); // Read potentiometer 1 value (0 to 1023)
+  int pot2Value = analogRead(A1); // Read potentiometer 2 value (0 to 1023)
+  int pot3Value = analogRead(A2); // Read potentiometer 3 value (0 to 1023)
+
+  // Map the potentiometer values to the range 0 to 250
+  int NValue1 = map(pot1Value, 0, 1023, 0, 250);
+  int PValue2 = map(pot2Value, 0, 1023, 0, 250);
+  int KValue3 = map(pot3Value, 0, 1023, 0, 250);
+
+  // Check if nitrogen, phosphorus, or potassium levels are critically low and print the appropriate messages
+  if (NValue1 < 20) {
+    Serial.println(F("Warning: Nitrogen level is critically low (below 20 ppm). Please add nitrogen"));
+  } else {
+    Serial.print("\tNitrogen Level : ");
+    Serial.println(NValue1); // Scaled value of potentiometer 1 (0-250)
+  }
+
+  if (PValue2 < 30) {
+    Serial.println(F("Warning: Phosphorus level is critically low (below 30 ppm). Please add phosphorus"));
+  } else {
+    Serial.print("\tPhosphorus Level : ");
+    Serial.println(PValue2); // Scaled value of potentiometer 2 (0-250)
+  }
+
+  if (KValue3 < 50) {
+    Serial.println(F("Warning: Potassium level is critically low (below 50 ppm). Please add potassium"));
+  } else {
+    Serial.print("\tPotassium Level : ");
+    Serial.println(KValue3);  // Scaled value of potentiometer 3 (0-250)
+  }
+
+  // Read light intensity
+  float lux = lightMeter.readLightLevel();
+
+  if (lux < 0) {
+    Serial.println("Error reading light level.");
+  } else {
+    Serial.print("Light Intensity: ");
+    Serial.print(lux);
+    Serial.println(" lux");
+
+    if (lux < 100) {
+      Serial.println("Light intensity is low! Turning on LED...");
+      digitalWrite(LED_PIN, HIGH); 
+    } else {
+      digitalWrite(LED_PIN, LOW);  
+    }
+  }
+
+  delay(1000); // Wait for 100 ms before reading again
+}
