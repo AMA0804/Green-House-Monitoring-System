@@ -1,0 +1,23 @@
+// Define the LM35 pin
+const int LM35_PIN = A0; // Connect LM35 output to analog pin A0
+
+void setup() {
+  Serial.begin(9600); // Start serial communication
+}
+
+void loop() {
+  // Read the analog value from LM35
+  int analogValue = analogRead(LM35_PIN);
+
+  // Convert the analog value to temperature in Celsius
+  // 5V ADC reference, 10-bit resolution -> ADC value range: 0-1023
+  float voltage = analogValue * (5.0 / 1023.0); // Convert ADC value to voltage
+  float temperatureC = voltage * 100.0;        // LM35 gives 10mV/°C
+
+  // Print the temperature to Serial Monitor
+  Serial.print("Temperature: ");
+  Serial.print(temperatureC);
+  Serial.println(" °C");
+
+  delay(1000); // Wait for 1 second before next reading
+}
